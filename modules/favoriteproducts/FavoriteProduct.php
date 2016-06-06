@@ -108,4 +108,9 @@ class FavoriteProduct extends ObjectModel
 			AND `id_product` = '.(int)$id_product.'
 			AND `id_shop` = '.(int)$shop->id);
 	}
+
+	public static function isGuestFavoriteProduct($id_product) {
+		$favoriteProducts = (array)json_decode(Context::getContext()->cookie->favoriteProducts);
+		return in_array($id_product,$favoriteProducts);
+	}
 }

@@ -24,6 +24,10 @@
 *  International Registered Trademark & Property of PrestaShop SA
 */
 
+
+
+
+
 /**
  * @since 1.5.0
  */
@@ -33,6 +37,7 @@ class FavoriteproductsActionsModuleFrontController extends ModuleFrontController
 	 * @var int
 	 */
 	public $id_product;
+	protected $favoriteProducts = [];
 
 	public function init()
 	{
@@ -61,6 +66,19 @@ class FavoriteproductsActionsModuleFrontController extends ModuleFrontController
 		if (!Validate::isLoadedObject($product))
 			die('0');
 
+		// if customer not registred
+		if (!$this->isRegistred()) {
+			$this->favoriteProducts = (array)json_decode(Context::getContext()->cookie->favoriteProducts);
+
+			if (($key = array_search($product->id, $this->favoriteProducts)) !== false) {
+				unset($this->favoriteProducts[$key]);
+				Context::getContext()->cookie->favoriteProducts = json_encode($this->favoriteProducts);
+				die('0');
+			}
+			die('1');
+		}
+
+
 		$favorite_product = FavoriteProduct::getFavoriteProduct((int)Context::getContext()->cookie->id_customer, (int)$product->id);
 		if ($favorite_product && $favorite_product->delete())
 			die('0');
@@ -74,8 +92,24 @@ class FavoriteproductsActionsModuleFrontController extends ModuleFrontController
 	{
 		$product = new Product($this->id_product);
 		// check if product exists
-		if (!Validate::isLoadedObject($product) || FavoriteProduct::isCustomerFavoriteProduct((int)Context::getContext()->cookie->id_customer, (int)$product->id))
+		if (!Validate::isLoadedObject($product) || FavoriteProduct::isCustomerFavoriteProduct((int)Context::getContext()->cookie->id_customer, (int)$product->id)) {
 			die('1');
+		}
+
+		if (!$this->isRegistred()) {
+			// add ProductsId to cookies;
+			// 1) read favorites array from cookies
+			$this->favoriteProducts = (array)json_decode(Context::getContext()->cookie->favoriteProducts);
+			// 2) add Favorite product to favorites if not_in array
+			if (!in_array($product->id,$this->favoriteProducts ? $this->favoriteProducts : [])){
+				$this->favoriteProducts[] = $product->id;
+				Context::getContext()->cookie->favoriteProducts = json_encode($this->favoriteProducts);
+				die('0');
+			}
+			var_dump($this->favoriteProducts);
+			die('1');
+		}
+
 		$favorite_product = new FavoriteProduct();
 		$favorite_product->id_product = $product->id;
 		$favorite_product->id_customer = (int)Context::getContext()->cookie->id_customer;
@@ -83,5 +117,22 @@ class FavoriteproductsActionsModuleFrontController extends ModuleFrontController
 		if ($favorite_product->add())
 			die('0');
 		die(1);
+	}
+
+	public function isRegistred()
+	{
+		return Context::getContext()->cookie->logged;
+	}
+
+	public function checkFavoriteProductsGuest()
+	{
+		$customerId = Context::getContext()->cookie->id_customer;
+		$guestId = Context::getContext()->cookie->id_guest;
+
+		if ($customerId == $guestId) {
+			return false;
+		}
+
+		echo json_decode($this->favoriteProducts);
 	}
 }

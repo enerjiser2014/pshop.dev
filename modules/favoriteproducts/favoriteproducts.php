@@ -53,7 +53,8 @@ class FavoriteProducts extends Module
 				|| !$this->registerHook('displayCustomerAccount')
 				|| !$this->registerHook('displayLeftColumnProduct')
 				|| !$this->registerHook('extraLeft')
-				|| !$this->registerHook('displayHeader'))
+				|| !$this->registerHook('displayHeader')
+				|| !$this->registerHook('displayImageBlockProductList'))
 					return false;
 
 			if (!Db::getInstance()->execute('
@@ -96,6 +97,7 @@ class FavoriteProducts extends Module
 
 		$this->smarty->assign(array(
 			'isCustomerFavoriteProduct' => (FavoriteProduct::isCustomerFavoriteProduct($this->context->customer->id, Tools::getValue('id_product')) ? 1 : 0),
+			'isGuestFavoriteProduct' => (FavoriteProduct::isGuestFavoriteProduct(Tools::getValue('id_product')) ? 1 : 0),
 			'isLogged' => (int)$this->context->customer->logged,
 		));
 		return $this->display(__FILE__, 'favoriteproducts-extra.tpl');
@@ -106,6 +108,15 @@ class FavoriteProducts extends Module
 		$this->context->controller->addCSS($this->_path.'favoriteproducts.css', 'all');
 		$this->context->controller->addJS($this->_path.'favoriteproducts.js');
 		return $this->display(__FILE__, 'favoriteproducts-header.tpl');
+	}
+
+
+	public function hookDisplayImageBlockProductList($params)
+	{
+
+		var_dump($params['product']['id_product']);
+
+		//return $this->display(__FILE__, 'imageBlockProductList.tpl');
 	}
 
 }
