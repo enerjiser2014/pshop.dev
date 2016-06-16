@@ -53,9 +53,24 @@ class FavoriteProducts extends Module
 				|| !$this->registerHook('displayCustomerAccount')
 				|| !$this->registerHook('displayLeftColumnProduct')
 				|| !$this->registerHook('extraLeft')
-				|| !$this->registerHook('displayHeader')
-				|| !$this->registerHook('displayImageBlockProductList'))
+				|| !$this->registerHook('displayHeader'))
 					return false;
+
+			if (!$this->registerHook('displayProductTabContent')){
+				return false;
+			}
+
+			if (!$this->registerHook('displayProductTab')){
+				return false;
+			}
+
+			if (!$this->registerHook('displayExtraRight')){
+				return false;
+			}
+
+			if (!$this->registerHook('displayProductImageBlock')){
+				return false;
+			}
 
 			if (!Db::getInstance()->execute('
 				CREATE TABLE `'._DB_PREFIX_.'favorite_product` (
@@ -97,7 +112,6 @@ class FavoriteProducts extends Module
 
 		$this->smarty->assign(array(
 			'isCustomerFavoriteProduct' => (FavoriteProduct::isCustomerFavoriteProduct($this->context->customer->id, Tools::getValue('id_product')) ? 1 : 0),
-			'isGuestFavoriteProduct' => (FavoriteProduct::isGuestFavoriteProduct(Tools::getValue('id_product')) ? 1 : 0),
 			'isLogged' => (int)$this->context->customer->logged,
 		));
 		return $this->display(__FILE__, 'favoriteproducts-extra.tpl');
@@ -110,15 +124,25 @@ class FavoriteProducts extends Module
 		return $this->display(__FILE__, 'favoriteproducts-header.tpl');
 	}
 
-
-	public function hookDisplayImageBlockProductList($params)
+	public function hookDisplayProductTabContent($params)
 	{
-
-		var_dump($params['product']['id_product']);
-
-		//return $this->display(__FILE__, 'imageBlockProductList.tpl');
+		return '<b>Display me on product page</b>';
 	}
 
+	public function hookDisplayProductTab($params)
+	{
+		return '<b>HookProductTab</b>';
+	}
+
+	public function hookDisplayExtraRight($params)
+	{
+		return '<b>HookExtraRight</b>';
+	}
+
+	public function hookDisplayProductImageBlock($params)
+	{
+		return $this->display(__FILE__, 'favoriteproducts-imageblock.tpl');
+	}
 }
 
 

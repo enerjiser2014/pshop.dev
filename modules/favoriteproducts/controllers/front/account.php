@@ -42,13 +42,20 @@ class FavoriteproductsAccountModuleFrontController extends ModuleFrontController
 	{
 		parent::initContent();
 
-		if (!Context::getContext()->customer->isLogged())
-			Tools::redirect('index.php?controller=authentication&redirect=module&module=favoriteproducts&action=account');
+		if (!Context::getContext()->customer->isLogged()) {
+			//Tools::redirect('index.php?controller=authentication&redirect=module&module=favoriteproducts&action=account');
+
+		}
 
 		if (Context::getContext()->customer->id)
 		{
 			$this->context->smarty->assign('favoriteProducts', FavoriteProduct::getFavoriteProducts((int)Context::getContext()->customer->id, (int)Context::getContext()->language->id));
 			$this->setTemplate('favoriteproducts-account.tpl');
+		} else {
+			$langId = $this->context->language->id;
+			$favoriteProducts = FavoriteProduct::guestToCustomerFavoriteProducts(0);
+			$this->context->smarty->assign(['favoriteProducts' => $favoriteProducts]);
+			$this->setTemplate('favoriteproducts-guest.tpl');
 		}
 	}
 }
